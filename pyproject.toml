@@ -17,6 +17,8 @@ dhis2-client = { git = "https://github.com/dhis2/dhis2-python-client.git" }
 [dependency-groups]
 dev = [
     "ruff>=0.8",
+    "mypy>=1.0",
+    "pyright>=1.0",
 ]
 
 [tool.ruff]

@@ -20,6 +20,8 @@ install:
 lint:
 	@$(UV) run ruff format .
 	@$(UV) run ruff check . --fix
+	@$(UV) run mypy .
+	@$(UV) run pyright
 
 run:
 	@$(UV) run python main.py
