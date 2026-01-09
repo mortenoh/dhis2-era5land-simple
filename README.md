@@ -68,6 +68,7 @@ docker compose logs -f schedule
 
 | Expression | Description |
 |------------|-------------|
+| `0 1 * * *` | Daily at 1:00 AM |
 | `0 6 * * *` | Daily at 6:00 AM |
 | `0 0 * * *` | Daily at midnight |
 | `0 6 * * 1` | Weekly on Monday at 6:00 AM |
