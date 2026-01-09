@@ -191,8 +191,9 @@ def main():
         exit(1)
 
     # Export CDS credentials for the cdsapi library
+    # (validated above, so these are not None)
     os.environ["CDSAPI_URL"] = CDSAPI_URL
-    os.environ["CDSAPI_KEY"] = CDSAPI_KEY
+    os.environ["CDSAPI_KEY"] = CDSAPI_KEY  # type: ignore[assignment]
 
     # Create DHIS2 client
     client = DHIS2Client(

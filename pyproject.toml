@@ -24,3 +24,11 @@ dev = [
 [tool.ruff]
 line-length = 120
 target-version = "py312"
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
