@@ -28,10 +28,13 @@ Required settings:
 ### 2. Run once
 
 ```bash
-# With Docker
+# Using pre-built image from GHCR (recommended)
+docker compose -f compose.ghcr.yml run --rm run
+
+# Or build locally
 docker compose run --rm run
 
-# Or locally
+# Or run locally without Docker
 uv run python main.py
 ```
 
@@ -39,9 +42,12 @@ uv run python main.py
 
 ```bash
 # Set schedule in .env
-echo "DHIS2_CRON=0 6 * * *" >> .env
+echo "DHIS2_CRON=0 1 * * *" >> .env
 
-# Start scheduler
+# Start scheduler (using pre-built image)
+docker compose -f compose.ghcr.yml up -d schedule
+
+# Or build locally
 docker compose up -d schedule
 
 # View logs
