@@ -59,6 +59,7 @@ DHIS2_DRY_RUN = os.getenv("DHIS2_DRY_RUN", "false").lower() == "true"
 # Value Transform
 # =============================================================================
 
+
 def meters_to_millimeters(value):
     """Convert precipitation from meters to millimeters."""
     return value * 1000
@@ -67,6 +68,7 @@ def meters_to_millimeters(value):
 # =============================================================================
 # Import Function
 # =============================================================================
+
 
 def import_era5_land_to_dhis2(
     client,
@@ -98,9 +100,7 @@ def import_era5_land_to_dhis2(
     print(f"Found {len(org_units)} organisation units at level {org_unit_level}")
 
     # Get last imported period
-    last_imported_response = client.analytics_latest_period_for_level(
-        de_uid=data_element_id, level=org_unit_level
-    )
+    last_imported_response = client.analytics_latest_period_for_level(de_uid=data_element_id, level=org_unit_level)
     last_imported_period = last_imported_response["existing"]
     last_imported_month_string = last_imported_period["id"][:6] if last_imported_period else None
 
@@ -112,7 +112,7 @@ def import_era5_land_to_dhis2(
     # Process each month
     for year, month in utils.time.iter_months(start_year, start_month, end_year, end_month):
         month_string = utils.time.dhis2_period(year=year, month=month)
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print(f"Processing {month_string}")
 
         # Check if import is needed
@@ -123,9 +123,7 @@ def import_era5_land_to_dhis2(
 
         # Download ERA5 data
         print("Downloading ERA5-Land data...")
-        hourly_data = era5_land.hourly.get(
-            year=year, month=month, variables=variables, bbox=org_units.total_bounds
-        )
+        hourly_data = era5_land.hourly.get(year=year, month=month, variables=variables, bbox=org_units.total_bounds)
 
         # Temporal aggregation
         print("Aggregating temporally...")
@@ -170,6 +168,7 @@ def import_era5_land_to_dhis2(
 # =============================================================================
 # Main
 # =============================================================================
+
 
 def main():
     """Main entry point."""
