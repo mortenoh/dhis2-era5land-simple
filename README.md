@@ -7,6 +7,8 @@ This is a minimal, educational example showing how to:
 - Run a Python script in Docker
 - Schedule automated runs with cron
 
+Based on the [Example: Import DHIS2 Daily](https://climate-tools.dhis2.org/import-data/example-import-dhis2-daily/) guide from the DHIS2 Climate Tools documentation.
+
 ## Quick Start
 
 ### 1. Create `.env` file
@@ -17,7 +19,7 @@ cp .env.example .env
 ```
 
 Required settings:
-- `CDSAPI_KEY` - Get from https://cds.climate.copernicus.eu/how-to-api
+- `CDSAPI_KEY` - See [CDS API Authentication](https://climate-tools.dhis2.org/getting-data/climate-data-store/api-authentication/)
 - `DHIS2_BASE_URL` - Your DHIS2 instance URL
 - `DHIS2_USERNAME` - DHIS2 username
 - `DHIS2_PASSWORD` - DHIS2 password
