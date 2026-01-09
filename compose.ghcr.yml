@@ -1,0 +1,10 @@
+services:
+  run:
+    image: ghcr.io/mortenoh/dhis2-era5land-simple:latest
+    env_file: .env
+
+  schedule:
+    image: ghcr.io/mortenoh/dhis2-era5land-simple:latest
+    env_file: .env
+    command: ["/scheduler.sh"]
+    restart: unless-stopped
