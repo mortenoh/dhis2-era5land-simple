@@ -1,0 +1,14 @@
+# Environment
+.env
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# uv
+uv.lock
+
+# IDE
+.idea/
+.vscode/

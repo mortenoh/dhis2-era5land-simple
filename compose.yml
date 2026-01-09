@@ -1,0 +1,13 @@
+services:
+  run:
+    build: .
+    env_file:
+      - path: .env
+        required: false
+
+  schedule:
+    build: .
+    command: ["/scheduler.sh"]
+    env_file:
+      - path: .env
+        required: false

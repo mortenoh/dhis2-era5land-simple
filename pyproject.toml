@@ -1,0 +1,20 @@
+[project]
+name = "dhis2-era5land-simple"
+version = "0.1.0"
+description = "Simple script to import ERA5-Land climate data into DHIS2"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dhis2-client @ git+https://github.com/dhis2/dhis2-python-client",
+    "dhis2eo @ git+https://github.com/dhis2/dhis2eo",
+    "python-dotenv",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
