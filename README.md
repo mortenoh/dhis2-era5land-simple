@@ -87,11 +87,14 @@ Use [crontab.guru](https://crontab.guru/) to build cron expressions.
 
 ```bash
 # Install dependencies
-uv sync
+make install
 
 # Run locally
-uv run python main.py
+make run
 
-# Format code
-uv run ruff format .
+# Lint and format code
+make lint
+
+# Build Docker image
+make docker-build
 ```
