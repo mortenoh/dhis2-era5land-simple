@@ -5,10 +5,14 @@ description = "Simple script to import ERA5-Land climate data into DHIS2"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "dhis2-client @ git+https://github.com/dhis2/dhis2-python-client",
-    "dhis2eo @ git+https://github.com/dhis2/dhis2eo",
+    "dhis2-client",
+    "dhis2eo",
     "python-dotenv",
 ]
+
+[tool.uv.sources]
+dhis2eo = { git = "https://github.com/dhis2/dhis2eo.git" }
+dhis2-client = { git = "https://github.com/dhis2/dhis2-python-client.git" }
 
 [dependency-groups]
 dev = [

@@ -418,7 +418,7 @@ wheels = [
 [[package]]
 name = "dhis2-client"
 version = "0.3.0"
-source = { git = "https://github.com/dhis2/dhis2-python-client#a2761be2727fb6b44e2e0c5d2d25adf4b0ef7747" }
+source = { git = "https://github.com/dhis2/dhis2-python-client.git#a2761be2727fb6b44e2e0c5d2d25adf4b0ef7747" }
 dependencies = [
     { name = "convertdate" },
     { name = "httpx" },
@@ -441,8 +441,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dhis2-client", git = "https://github.com/dhis2/dhis2-python-client" },
-    { name = "dhis2eo", git = "https://github.com/dhis2/dhis2eo" },
+    { name = "dhis2-client", git = "https://github.com/dhis2/dhis2-python-client.git" },
+    { name = "dhis2eo", git = "https://github.com/dhis2/dhis2eo.git" },
     { name = "python-dotenv" },
 ]
 
@@ -452,7 +452,7 @@ dev = [{ name = "ruff", specifier = ">=0.8" }]
 [[package]]
 name = "dhis2eo"
 version = "0.2.0"
-source = { git = "https://github.com/dhis2/dhis2eo#5bac4b8fb9cf3327706c2b4bd58125f6e9b312d6" }
+source = { git = "https://github.com/dhis2/dhis2eo.git#5bac4b8fb9cf3327706c2b4bd58125f6e9b312d6" }
 dependencies = [
     { name = "earthkit-data", extra = ["cds", "geopandas", "geotiff", "projection"] },
     { name = "pandas" },
