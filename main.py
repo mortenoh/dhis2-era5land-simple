@@ -7,6 +7,7 @@ Configuration is loaded from environment variables (or .env file).
 """
 
 import json
+import logging
 import os
 from datetime import date
 
@@ -17,6 +18,10 @@ from dhis2eo.data.cds import era5_land
 from dhis2eo.integrations.pandas import dataframe_to_dhis2_json
 from dotenv import load_dotenv
 from earthkit import transforms
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -94,10 +99,10 @@ def import_era5_land_to_dhis2(
     end_year, end_month = end.year, end.month
 
     # Get org units from DHIS2
-    print("Fetching organisation units from DHIS2...")
+    logger.info("Fetching organisation units from DHIS2...")
     org_units_geojson = client.get_org_units_geojson(level=org_unit_level)
     org_units = gpd.read_file(json.dumps(org_units_geojson))
-    print(f"Found {len(org_units)} organisation units at level {org_unit_level}")
+    logger.info("Found %d organisation units at level %d", len(org_units), org_unit_level)
 
     # Get last imported period
     last_imported_response = client.analytics_latest_period_for_level(de_uid=data_element_id, level=org_unit_level)
@@ -105,28 +110,28 @@ def import_era5_land_to_dhis2(
     last_imported_month_string = last_imported_period["id"][:6] if last_imported_period else None
 
     if last_imported_month_string:
-        print(f"Last imported period: {last_imported_month_string}")
+        logger.info("Last imported period: %s", last_imported_month_string)
     else:
-        print("No existing data found")
+        logger.info("No existing data found")
 
     # Process each month
     for year, month in utils.time.iter_months(start_year, start_month, end_year, end_month):
         month_string = utils.time.dhis2_period(year=year, month=month)
-        print(f"\n{'=' * 50}")
-        print(f"Processing {month_string}")
+        logger.info("=" * 50)
+        logger.info("Processing %s", month_string)
 
         # Check if import is needed
         needs_import = last_imported_month_string is None or (month_string >= last_imported_month_string)
         if not needs_import:
-            print("Already imported, skipping...")
+            logger.info("Already imported, skipping...")
             continue
 
         # Download ERA5 data
-        print("Downloading ERA5-Land data...")
+        logger.info("Downloading ERA5-Land data...")
         hourly_data = era5_land.hourly.get(year=year, month=month, variables=variables, bbox=org_units.total_bounds)
 
         # Temporal aggregation
-        print("Aggregating temporally...")
+        logger.info("Aggregating temporally...")
         agg_time = transforms.temporal.daily_reduce(
             hourly_data[value_col],
             how=temporal_aggregation,
@@ -135,7 +140,7 @@ def import_era5_land_to_dhis2(
         )
 
         # Spatial aggregation
-        print("Aggregating to organisation units...")
+        logger.info("Aggregating to organisation units...")
         agg_org_units = transforms.spatial.reduce(
             agg_time,
             org_units,
@@ -145,11 +150,11 @@ def import_era5_land_to_dhis2(
         agg_df = agg_org_units.to_dataframe().reset_index()
 
         # Apply value transform
-        print("Applying value transform...")
+        logger.info("Applying value transform...")
         agg_df[value_col] = agg_df[value_col].apply(value_func)
 
         # Create DHIS2 payload
-        print(f"Creating payload with {len(agg_df)} values...")
+        logger.info("Creating payload with %d values...", len(agg_df))
         payload = dataframe_to_dhis2_json(
             df=agg_df,
             org_unit_col="id",
@@ -160,9 +165,9 @@ def import_era5_land_to_dhis2(
 
         # Import to DHIS2
         mode = "DRY RUN" if dry_run else "IMPORTING"
-        print(f"{mode}...")
+        logger.info("%s...", mode)
         res = client.post("/api/dataValueSets", json=payload, params={"dryRun": str(dry_run).lower()})
-        print(f"Result: {res['response']['importCount']}")
+        logger.info("Result: %s", res["response"]["importCount"])
 
 
 # =============================================================================
@@ -186,8 +191,8 @@ def main():
         missing.append("DHIS2_DATA_ELEMENT_ID")
 
     if missing:
-        print(f"ERROR: Missing required environment variables: {', '.join(missing)}")
-        print("Create a .env file or set these environment variables.")
+        logger.error("Missing required environment variables: %s", ", ".join(missing))
+        logger.error("Create a .env file or set these environment variables.")
         exit(1)
 
     # Export CDS credentials for the cdsapi library
@@ -202,9 +207,9 @@ def main():
         password=DHIS2_PASSWORD,
     )
 
-    print(f"Starting import: {DHIS2_START_DATE} to {DHIS2_END_DATE}")
-    print(f"Variable: {DHIS2_VARIABLE}")
-    print(f"Dry run: {DHIS2_DRY_RUN}")
+    logger.info("Starting import: %s to %s", DHIS2_START_DATE, DHIS2_END_DATE)
+    logger.info("Variable: %s", DHIS2_VARIABLE)
+    logger.info("Dry run: %s", DHIS2_DRY_RUN)
 
     # Run import
     import_era5_land_to_dhis2(
@@ -222,7 +227,7 @@ def main():
         dry_run=DHIS2_DRY_RUN,
     )
 
-    print("\nDone!")
+    logger.info("Done!")
 
 
 if __name__ == "__main__":
