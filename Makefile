@@ -28,8 +28,7 @@ run:
 	@$(UV) run python main.py
 
 run-notebook:
-	@mkdir -p target/output
-	@$(UV) run papermill notebooks/import-era5-daily.ipynb target/output/import-era5-daily-output.ipynb
+	@$(UV) run python scripts/run_notebook.py
 
 docker-build:
 	@docker compose build
