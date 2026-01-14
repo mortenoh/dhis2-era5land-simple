@@ -134,6 +134,24 @@ AttributeError: module 'dhis2eo.data.cds.era5_land.hourly' has no attribute 'get
 
 **Solution:** The old script was removed and the new implementation is now the only version. There is no way to maintain backward compatibility without pinning to an older `dhis2eo` version.
 
+### Issue 4: Notebook missing parameters tag for papermill
+
+**Problem:** Papermill couldn't inject parameters because the notebook lacked the `parameters` cell tag.
+
+**Error:**
+```
+Passed unknown parameter: DHIS2_BASE_URL
+Input notebook does not contain a cell with tag 'parameters'
+```
+
+**Solution:** Added `parameters` tag to the configuration cell in the notebook metadata.
+
+### Issue 5: Same date format bug in notebook
+
+**Problem:** The notebook had the same DHIS2 period format issue as the script.
+
+**Solution:** Applied the same fix - convert `YYYYMM` to `YYYY-MM-DD` before passing to `download()`.
+
 ## New Dependencies
 
 | Package | Purpose |

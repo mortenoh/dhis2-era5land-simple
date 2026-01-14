@@ -132,22 +132,22 @@ The scheduler container:
 Alternatively, run the original notebook directly using [papermill](https://papermill.readthedocs.io/):
 
 ```bash
-# Run notebook with default parameters
+# Run notebook with parameters from .env (outputs to stdout)
 make run-notebook
-
-# Or with custom parameters
-uv run papermill \
-  notebooks/import-era5-daily.ipynb \
-  target/output/result.ipynb \
-  -p DHIS2_BASE_URL "https://your-instance.org" \
-  -p DHIS2_DRY_RUN true
 ```
 
-Papermill allows parameterizing notebook cells, making it useful for:
+This uses `scripts/run_notebook.py` which:
 
+1. Loads configuration from `.env` file
+2. Passes parameters to papermill (DHIS2 credentials, data element ID, etc.)
+3. Streams output to stdout for logging (no output file created)
+4. Shares the cache folder with `main.py` for faster subsequent runs
+
+Papermill is useful for:
+
+- Running notebooks in CI/CD pipelines
 - Testing with different configurations
-- CI/CD pipelines
-- Generating output notebooks with results
+- Keeping the notebook as the source of truth
 
 ## Configuration reference
 
