@@ -1,113 +1,34 @@
-# Tutorial: From Notebook to Scheduled Imports
+# Automating ERA5-Land Imports
 
-This tutorial walks through the journey from exploring climate data in a Jupyter notebook to running automated, scheduled imports into DHIS2.
-
-## Overview
-
-The workflow has three stages:
-
-1. **Explore** - Use the notebook interactively to understand the data and workflow
-2. **Automate** - Convert to a script with environment variable configuration
-3. **Schedule** - Run automatically on a recurring basis using Docker and cron
+This guide explains how to set up automated, scheduled imports of ERA5-Land climate data into DHIS2. It builds on the [Import ERA5 Daily](https://climate-tools.dhis2.org/workflows/import-era5/import-era5-daily/) workflow, showing how to move from interactive notebook exploration to production-ready scheduled imports.
 
 ## Prerequisites
 
-Before starting, make sure you have:
+Before starting, ensure you have:
 
-- [CDS API access](https://climate-tools.dhis2.org/getting-data/climate-data-store/api-authentication/) configured
-- A DHIS2 instance with a data element for precipitation
-- [uv](https://docs.astral.sh/uv/) installed for Python dependency management
-- Docker installed (for scheduling)
+- Completed the [CDS API Authentication](https://climate-tools.dhis2.org/getting-data/climate-data-store/api-authentication/) setup
+- A DHIS2 instance with a configured data element (see [Prepare Metadata](https://climate-tools.dhis2.org/import-data/prepare-metadata/))
+- Basic familiarity with the [Import ERA5 Daily](https://climate-tools.dhis2.org/workflows/import-era5/import-era5-daily/) notebook
 
-## Stage 1: Explore with the Notebook
+## 1) Understand the workflow
 
-The best way to understand the workflow is to run through the notebook interactively.
+The import process follows these steps:
 
-### Option A: Run on climate-tools.dhis2.org
+1. **Connect to DHIS2** - authenticate and fetch organisation unit geometries
+2. **Check existing data** - determine what's already been imported
+3. **Download ERA5-Land data** - fetch hourly precipitation from the CDS API
+4. **Aggregate temporally** - convert hourly values to daily totals
+5. **Aggregate spatially** - map grid cells to organisation unit boundaries
+6. **Convert units** - transform meters to millimeters
+7. **Import to DHIS2** - POST data values to the API
 
-The easiest option is to use the hosted JupyterHub:
+The [Import ERA5 Daily](https://climate-tools.dhis2.org/workflows/import-era5/import-era5-daily/) notebook walks through each step interactively. Run through it first to understand the process before automating.
 
-1. Go to [climate-tools.dhis2.org](https://climate-tools.dhis2.org)
-2. Open the [Import ERA5 Daily](https://climate-tools.dhis2.org/workflows/import-era5/import-era5-daily/) notebook
-3. Follow along, modifying parameters for your DHIS2 instance
+## 2) Configure with environment variables
 
-### Option B: Run locally with papermill
+For automation, credentials and settings should be externalized using environment variables rather than hardcoded in scripts.
 
-If you prefer running locally:
-
-```bash
-# Clone this repo
-git clone https://github.com/mortenoh/dhis2-era5land-simple.git
-cd dhis2-era5land-simple
-
-# Install dependencies
-uv sync
-
-# Run the notebook (outputs to target/output/)
-make run-notebook
-```
-
-The notebook is at `notebooks/import-era5-daily.ipynb`. You can also open it in JupyterLab:
-
-```bash
-uv run jupyter lab notebooks/import-era5-daily.ipynb
-```
-
-### What the notebook does
-
-The notebook demonstrates the complete workflow:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  1. Connect to DHIS2                                        │
-│     - Authenticate with username/password                   │
-│     - Fetch organisation unit geometries                    │
-│     - Check what data already exists                        │
-├─────────────────────────────────────────────────────────────┤
-│  2. Download ERA5-Land data                                 │
-│     - Request hourly precipitation from CDS API             │
-│     - Cache files locally to avoid re-downloading           │
-├─────────────────────────────────────────────────────────────┤
-│  3. Aggregate temporally                                    │
-│     - Convert hourly → daily values                         │
-│     - Sum precipitation for each day                        │
-├─────────────────────────────────────────────────────────────┤
-│  4. Aggregate spatially                                     │
-│     - Map grid cells to organisation unit boundaries        │
-│     - Calculate mean value for each org unit                │
-├─────────────────────────────────────────────────────────────┤
-│  5. Convert units                                           │
-│     - Transform meters → millimeters                        │
-├─────────────────────────────────────────────────────────────┤
-│  6. Import to DHIS2                                         │
-│     - Create JSON payload                                   │
-│     - POST to /api/dataValueSets                            │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Stage 2: Automate with Environment Variables
-
-Once you understand the workflow, the next step is making it configurable and repeatable.
-
-### Why environment variables?
-
-Hardcoding credentials and settings in a script is problematic:
-
-- **Security risk** - credentials might end up in version control
-- **Inflexible** - changing settings requires editing code
-- **Environment-specific** - different settings for dev/staging/prod
-
-Environment variables solve these issues by externalizing configuration.
-
-### The .env file
-
-Create a `.env` file with your settings:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your values:
+Create a `.env` file:
 
 ```bash
 # Required - CDS API
@@ -121,77 +42,69 @@ DHIS2_DATA_ELEMENT_ID=your-data-element-id
 
 # Optional - customize behavior
 DHIS2_START_DATE=2025-01-01
-DHIS2_END_DATE=2025-12-31
-DHIS2_DRY_RUN=true  # Set to false for actual imports
+DHIS2_ORG_UNIT_LEVEL=2
+DHIS2_DRY_RUN=true
 ```
 
-### How the script loads configuration
-
-The script uses `python-dotenv` to load the `.env` file:
+The Python script loads these using `python-dotenv`:
 
 ```python
 from dotenv import load_dotenv
 import os
 
-# Load .env file into environment
 load_dotenv()
 
-# Read values with defaults
 DHIS2_BASE_URL = os.getenv("DHIS2_BASE_URL")
 DHIS2_DRY_RUN = os.getenv("DHIS2_DRY_RUN", "false").lower() == "true"
 ```
 
-This pattern allows:
-- Local development with `.env` file
-- Production deployment with actual environment variables
-- Docker containers with `--env-file` flag
+This approach allows:
 
-### Test locally
+- **Security** - credentials stay out of version control
+- **Flexibility** - different settings per environment (dev/staging/prod)
+- **Docker compatibility** - containers can use `--env-file` flag
+
+## 3) Run the import script
+
+A complete import script is available at [dhis2-era5land-simple](https://github.com/mortenoh/dhis2-era5land-simple).
 
 ```bash
-# Run with dry-run mode first
-make run
+# Clone the repository
+git clone https://github.com/mortenoh/dhis2-era5land-simple.git
+cd dhis2-era5land-simple
 
-# Check the output, then set DHIS2_DRY_RUN=false for actual imports
+# Create .env file with your settings
+cp .env.example .env
+# Edit .env with your credentials
+
+# Install dependencies
+uv sync
+
+# Test with dry-run mode
+make run
 ```
 
-## Stage 3: Schedule with Docker and Cron
+The script will:
 
-For production use, you want imports to run automatically.
+- Skip months that have already been imported
+- Cache downloaded ERA5 files locally (in `target/data/`)
+- Log progress and import counts
 
-### Why Docker?
+## 4) Schedule with Docker and cron
 
-- **Isolation** - dependencies don't conflict with system packages
-- **Reproducibility** - same environment everywhere
-- **Easy deployment** - single image contains everything needed
+For production use, run imports automatically on a schedule using Docker.
 
-### The scheduler
-
-This repo includes a scheduler that runs the import on a cron schedule:
+### Start the scheduler
 
 ```bash
-# Add schedule to .env
-echo "DHIS2_CRON=0 6 * * *" >> .env  # Daily at 6 AM
+# Add schedule to .env (daily at 6 AM)
+echo "DHIS2_CRON=0 6 * * *" >> .env
 
-# Start the scheduler
-docker compose up -d schedule
+# Start using pre-built image
+docker compose -f compose.ghcr.yml up -d schedule
 
 # View logs
 docker compose logs -f schedule
-```
-
-### How it works
-
-The `scripts/scheduler.sh` script:
-
-1. Reads `DHIS2_CRON` from environment (default: `0 1 * * *`)
-2. Creates a crontab entry that runs `main.py`
-3. Forwards output to Docker logs
-4. Runs cron in the foreground to keep the container alive
-
-```bash
-# Example crontab entry created by scheduler.sh:
-0 6 * * * cd /app && uv run --no-sync python main.py >> /proc/1/fd/1 2>&1
 ```
 
 ### Cron expression examples
@@ -202,84 +115,70 @@ The `scripts/scheduler.sh` script:
 | `0 1 * * *` | Daily at 1:00 AM |
 | `0 0 * * 0` | Weekly on Sunday at midnight |
 | `0 0 1 * *` | Monthly on the 1st |
-| `*/30 * * * *` | Every 30 minutes (for testing) |
 
 Use [crontab.guru](https://crontab.guru/) to build expressions.
 
-### Using the pre-built image
+### How the scheduler works
 
-For easier deployment, use the pre-built image from GitHub Container Registry:
+The scheduler container:
 
-```bash
-# Run once
-docker compose -f compose.ghcr.yml run --rm run
+1. Reads `DHIS2_CRON` from environment variables
+2. Creates a crontab entry that runs `main.py`
+3. Forwards output to Docker logs for monitoring
+4. Runs continuously, executing the import on schedule
 
-# Start scheduler
-docker compose -f compose.ghcr.yml up -d schedule
-```
+## 5) Run notebooks with papermill
 
-## Complete Setup Example
-
-Here's a complete example from scratch:
+Alternatively, run the original notebook directly using [papermill](https://papermill.readthedocs.io/):
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/mortenoh/dhis2-era5land-simple.git
-cd dhis2-era5land-simple
+# Run notebook with default parameters
+make run-notebook
 
-# 2. Create .env file
-cat > .env << 'EOF'
-CDSAPI_KEY=your-cds-api-key
-DHIS2_BASE_URL=https://play.im.dhis2.org/stable-2-42-3-1
-DHIS2_USERNAME=admin
-DHIS2_PASSWORD=district
-DHIS2_DATA_ELEMENT_ID=Ngy4iWUXwYb
-DHIS2_START_DATE=2025-01-01
-DHIS2_DRY_RUN=true
-DHIS2_CRON=0 6 * * *
-EOF
-
-# 3. Test locally first
-uv sync
-make run
-
-# 4. If everything looks good, disable dry-run
-sed -i '' 's/DHIS2_DRY_RUN=true/DHIS2_DRY_RUN=false/' .env
-
-# 5. Run actual import
-make run
-
-# 6. Start scheduled imports
-docker compose -f compose.ghcr.yml up -d schedule
-
-# 7. Check it's running
-docker compose logs -f schedule
+# Or with custom parameters
+uv run papermill \
+  notebooks/import-era5-daily.ipynb \
+  target/output/result.ipynb \
+  -p DHIS2_BASE_URL "https://your-instance.org" \
+  -p DHIS2_DRY_RUN true
 ```
+
+Papermill allows parameterizing notebook cells, making it useful for:
+
+- Testing with different configurations
+- CI/CD pipelines
+- Generating output notebooks with results
+
+## Configuration reference
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CDSAPI_KEY` | - | CDS API key (required) |
+| `DHIS2_BASE_URL` | - | DHIS2 instance URL (required) |
+| `DHIS2_USERNAME` | - | DHIS2 username (required) |
+| `DHIS2_PASSWORD` | - | DHIS2 password (required) |
+| `DHIS2_DATA_ELEMENT_ID` | - | Target data element (required) |
+| `DHIS2_START_DATE` | `2025-01-01` | Import start date |
+| `DHIS2_END_DATE` | today | Import end date |
+| `DHIS2_ORG_UNIT_LEVEL` | `2` | Organisation unit level |
+| `DHIS2_TIMEZONE_OFFSET` | `0` | Hours offset from UTC |
+| `DHIS2_DRY_RUN` | `false` | Test without importing |
+| `DHIS2_DOWNLOAD_FOLDER` | `./target/data` | Cache folder for ERA5 files |
+| `DHIS2_CRON` | `0 1 * * *` | Cron schedule expression |
 
 ## Troubleshooting
 
-### "No new data files to process"
+- **"No new data files to process"** - All data for the date range is already imported. Extend `DHIS2_END_DATE` or check `DHIS2_START_DATE`.
 
-This means all data for the date range has already been imported. Either:
-- Extend `DHIS2_END_DATE` to include more recent dates
-- Change `DHIS2_START_DATE` to an earlier date
+- **CDS API errors** - Verify your API key and that you've accepted the [ERA5-Land terms](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land).
 
-### CDS API errors
+- **DHIS2 authentication errors** - Check credentials work in the web interface and that the user has data import permissions.
 
-- Verify your API key at [cds.climate.copernicus.eu](https://cds.climate.copernicus.eu/)
-- Check you've accepted the terms for ERA5-Land dataset
-- The API has rate limits - large requests may be queued
+- **Import count is 0** - The data element may not be assigned to a dataset, or the organisation units may not match.
 
-### DHIS2 authentication errors
+## Further reading
 
-- Verify credentials work in the DHIS2 web interface
-- Check the user has permission to import data values
-- Ensure the data element ID exists and is accessible
-
-## Further Reading
-
-- [DHIS2 Climate Tools Documentation](https://climate-tools.dhis2.org/)
+- [Import ERA5 Daily Notebook](https://climate-tools.dhis2.org/workflows/import-era5/import-era5-daily/)
+- [Basics of Importing with Python Client](https://climate-tools.dhis2.org/import-data/basics-python-client-import/)
+- [Prepare Metadata](https://climate-tools.dhis2.org/import-data/prepare-metadata/)
 - [ERA5-Land Dataset](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land)
-- [CDS API Authentication Guide](https://climate-tools.dhis2.org/getting-data/climate-data-store/api-authentication/)
-- [dhis2eo Library](https://github.com/dhis2/dhis2eo)
-- [earthkit Documentation](https://earthkit.readthedocs.io/)
