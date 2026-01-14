@@ -4,6 +4,7 @@
 import os
 import subprocess
 import sys
+from datetime import date
 
 from dotenv import load_dotenv
 
@@ -31,7 +32,7 @@ params = [
     "-p", "DHIS2_TIMEZONE_OFFSET", os.getenv("DHIS2_TIMEZONE_OFFSET", "0"),
     "-p", "DOWNLOAD_FOLDER", os.getenv("DHIS2_DOWNLOAD_FOLDER", "./target/data"),
     "-p", "IMPORT_START_DATE", os.getenv("DHIS2_START_DATE", "2025-01-01"),
-    "-p", "IMPORT_END_DATE", os.getenv("DHIS2_END_DATE", ""),
+    "-p", "IMPORT_END_DATE", os.getenv("DHIS2_END_DATE", date.today().isoformat()),
 ]
 
 # Output to /dev/null, log to stdout
