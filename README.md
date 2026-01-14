@@ -34,11 +34,8 @@ docker compose -f compose.ghcr.yml run --rm run
 # Or build locally
 docker compose run --rm run
 
-# Or run locally without Docker (v1)
+# Or run locally without Docker
 uv run python main.py
-
-# Or run locally without Docker (v2 - with file caching)
-uv run python main_v2.py
 
 # Or run the notebook directly via papermill
 make run-notebook
@@ -76,7 +73,7 @@ docker compose logs -f schedule
 | `DHIS2_ORG_UNIT_LEVEL` | No | `2` | Organisation unit level |
 | `DHIS2_DRY_RUN` | No | `false` | Don't actually import |
 
-### V2 specific settings
+### Download and unit settings
 
 | Variable | Default | Description |
 |----------|---------|-------------|
