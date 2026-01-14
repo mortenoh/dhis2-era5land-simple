@@ -20,6 +20,7 @@ if cdsapi_key:
 notebook_input = "notebooks/import-era5-daily.ipynb"
 
 # Parameters to pass to the notebook
+# Note: notebook uses IMPORT_START_DATE/IMPORT_END_DATE, .env uses DHIS2_START_DATE/DHIS2_END_DATE
 params = [
     "-p", "DHIS2_BASE_URL", os.getenv("DHIS2_BASE_URL", ""),
     "-p", "DHIS2_USERNAME", os.getenv("DHIS2_USERNAME", ""),
@@ -29,6 +30,8 @@ params = [
     "-p", "DHIS2_DRY_RUN", os.getenv("DHIS2_DRY_RUN", "true"),
     "-p", "DHIS2_TIMEZONE_OFFSET", os.getenv("DHIS2_TIMEZONE_OFFSET", "0"),
     "-p", "DOWNLOAD_FOLDER", os.getenv("DHIS2_DOWNLOAD_FOLDER", "./target/data"),
+    "-p", "IMPORT_START_DATE", os.getenv("DHIS2_START_DATE", "2025-01-01"),
+    "-p", "IMPORT_END_DATE", os.getenv("DHIS2_END_DATE", ""),
 ]
 
 # Output to /dev/null, log to stdout
