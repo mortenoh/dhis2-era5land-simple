@@ -34,8 +34,14 @@ docker compose -f compose.ghcr.yml run --rm run
 # Or build locally
 docker compose run --rm run
 
-# Or run locally without Docker
+# Or run locally without Docker (v1)
 uv run python main.py
+
+# Or run locally without Docker (v2 - with file caching)
+uv run python main_v2.py
+
+# Or run the notebook directly via papermill
+make run-notebook
 ```
 
 ### 3. Run on schedule
@@ -69,6 +75,15 @@ docker compose logs -f schedule
 | `DHIS2_TIMEZONE_OFFSET` | No | `0` | Timezone offset hours |
 | `DHIS2_ORG_UNIT_LEVEL` | No | `2` | Organisation unit level |
 | `DHIS2_DRY_RUN` | No | `false` | Don't actually import |
+
+### V2 specific settings
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DHIS2_DOWNLOAD_FOLDER` | `./target/data` | Folder to cache downloaded ERA5 files |
+| `DHIS2_DOWNLOAD_PREFIX` | `era5_hourly` | Prefix for cached files |
+| `DHIS2_FROM_UNITS` | `m` | Source units for conversion |
+| `DHIS2_TO_UNITS` | `mm` | Target units for conversion |
 
 ## Cron Schedule Examples
 

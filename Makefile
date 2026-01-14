@@ -1,4 +1,4 @@
-.PHONY: help install lint run docker-build docker-run docker-schedule clean
+.PHONY: help install lint run run-v2 run-notebook docker-build docker-run docker-schedule clean
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -8,7 +8,9 @@ help:
 	@echo "Targets:"
 	@echo "  install          Install dependencies"
 	@echo "  lint             Run linter"
-	@echo "  run              Run the import script"
+	@echo "  run              Run the import script (v1)"
+	@echo "  run-v2           Run the import script (v2 with file caching)"
+	@echo "  run-notebook     Run the notebook via papermill"
 	@echo "  docker-build     Build Docker image"
 	@echo "  docker-run       Run import in Docker"
 	@echo "  docker-schedule  Start scheduler in Docker"
@@ -25,6 +27,13 @@ lint:
 
 run:
 	@$(UV) run python main.py
+
+run-v2:
+	@$(UV) run python main_v2.py
+
+run-notebook:
+	@mkdir -p target/output
+	@$(UV) run papermill notebooks/import-era5-daily.ipynb target/output/import-era5-daily-output.ipynb
 
 docker-build:
 	@docker compose build
