@@ -152,6 +152,21 @@ Input notebook does not contain a cell with tag 'parameters'
 
 **Solution:** Applied the same fix - convert `YYYYMM` to `YYYY-MM-DD` before passing to `download()`.
 
+## Parameter Name Mapping
+
+The script (`main.py`) and notebook use different naming conventions. When running via papermill (`run_notebook.py`), the script translates between them:
+
+| .env / main.py | notebook / papermill |
+|----------------|---------------------|
+| `DHIS2_START_DATE` | `IMPORT_START_DATE` |
+| `DHIS2_END_DATE` | `IMPORT_END_DATE` |
+| `DHIS2_VARIABLE` | `IMPORT_VARIABLE` |
+| `DHIS2_FROM_UNITS` | `IMPORT_FROM_UNITS` |
+| `DHIS2_TO_UNITS` | `IMPORT_TO_UNITS` |
+| `DHIS2_DOWNLOAD_FOLDER` | `DOWNLOAD_FOLDER` |
+
+The `run_notebook.py` script handles this translation automatically.
+
 ## New Dependencies
 
 | Package | Purpose |

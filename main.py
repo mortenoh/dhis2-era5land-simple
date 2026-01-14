@@ -49,6 +49,9 @@ DHIS2_PASSWORD = os.getenv("DHIS2_PASSWORD")
 DHIS2_DATA_ELEMENT_ID = os.getenv("DHIS2_DATA_ELEMENT_ID")
 
 # ERA5 variable configuration
+# DHIS2_VARIABLE: CDS catalogue name (e.g., "total_precipitation")
+# DHIS2_VALUE_COL: Column name in downloaded xarray dataset (e.g., "tp")
+# These are coupled - the value_col depends on which variable you download
 DHIS2_VARIABLE = os.getenv("DHIS2_VARIABLE", "total_precipitation")
 DHIS2_VALUE_COL = os.getenv("DHIS2_VALUE_COL", "tp")
 
@@ -71,7 +74,7 @@ DHIS2_DOWNLOAD_PREFIX = os.getenv("DHIS2_DOWNLOAD_PREFIX", "era5_hourly")
 # Other settings
 DHIS2_TIMEZONE_OFFSET = int(os.getenv("DHIS2_TIMEZONE_OFFSET", "0"))
 DHIS2_ORG_UNIT_LEVEL = int(os.getenv("DHIS2_ORG_UNIT_LEVEL", "2"))
-DHIS2_DRY_RUN = os.getenv("DHIS2_DRY_RUN", "false").lower() == "true"
+DHIS2_DRY_RUN = os.getenv("DHIS2_DRY_RUN", "true").lower() == "true"
 
 
 # =============================================================================

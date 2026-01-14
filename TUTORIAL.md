@@ -162,8 +162,14 @@ Papermill is useful for:
 | `DHIS2_END_DATE` | today | Import end date |
 | `DHIS2_ORG_UNIT_LEVEL` | `2` | Organisation unit level |
 | `DHIS2_TIMEZONE_OFFSET` | `0` | Hours offset from UTC |
-| `DHIS2_DRY_RUN` | `false` | Test without importing |
+| `DHIS2_DRY_RUN` | `true` | Test without importing |
 | `DHIS2_DOWNLOAD_FOLDER` | `./target/data` | Cache folder for ERA5 files |
+| `DHIS2_VARIABLE` | `total_precipitation` | ERA5 variable name |
+| `DHIS2_VALUE_COL` | `tp` | Column name in dataset |
+| `DHIS2_FROM_UNITS` | `m` | Source units for conversion |
+| `DHIS2_TO_UNITS` | `mm` | Target units for conversion |
+| `DHIS2_TEMPORAL_AGGREGATION` | `sum` | How to aggregate hourly to daily |
+| `DHIS2_SPATIAL_AGGREGATION` | `mean` | How to aggregate grid to org units |
 | `DHIS2_CRON` | `0 1 * * *` | Cron schedule expression |
 
 ## Troubleshooting
