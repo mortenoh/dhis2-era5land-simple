@@ -9,3 +9,6 @@ __pycache__/
 # IDE
 .idea/
 .vscode/
+
+# Data cache (v2)
+target/

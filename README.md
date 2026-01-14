@@ -36,6 +36,9 @@ docker compose run --rm run
 
 # Or run locally without Docker
 uv run python main.py
+
+# Or run the notebook directly via papermill
+make run-notebook
 ```
 
 ### 3. Run on schedule
@@ -64,11 +67,29 @@ docker compose logs -f schedule
 | `DHIS2_PASSWORD` | **Yes** | - | DHIS2 password |
 | `DHIS2_DATA_ELEMENT_ID` | **Yes** | - | Target data element |
 | `DHIS2_START_DATE` | No | `2025-01-01` | Start date |
-| `DHIS2_END_DATE` | No | `2025-01-07` | End date |
+| `DHIS2_END_DATE` | No | today | End date |
 | `DHIS2_CRON` | No | `0 1 * * *` | Cron schedule |
 | `DHIS2_TIMEZONE_OFFSET` | No | `0` | Timezone offset hours |
 | `DHIS2_ORG_UNIT_LEVEL` | No | `2` | Organisation unit level |
-| `DHIS2_DRY_RUN` | No | `false` | Don't actually import |
+| `DHIS2_DRY_RUN` | No | `true` | Don't actually import |
+
+### Download and unit settings
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DHIS2_DOWNLOAD_FOLDER` | `./target/data` | Folder to cache downloaded ERA5 files |
+| `DHIS2_DOWNLOAD_PREFIX` | `era5_hourly` | Prefix for cached files |
+| `DHIS2_FROM_UNITS` | `m` | Source units for conversion |
+| `DHIS2_TO_UNITS` | `mm` | Target units for conversion |
+
+### ERA5 variable settings
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DHIS2_VARIABLE` | `total_precipitation` | ERA5 variable name in CDS catalogue |
+| `DHIS2_VALUE_COL` | `tp` | Column name in downloaded dataset |
+| `DHIS2_TEMPORAL_AGGREGATION` | `sum` | How to aggregate hourly to daily |
+| `DHIS2_SPATIAL_AGGREGATION` | `mean` | How to aggregate grid to org units |
 
 ## Cron Schedule Examples
 

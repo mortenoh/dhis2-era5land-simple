@@ -1,4 +1,4 @@
-.PHONY: help install lint run docker-build docker-run docker-schedule clean
+.PHONY: help install lint run run-notebook docker-build docker-run docker-schedule clean
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -9,6 +9,7 @@ help:
 	@echo "  install          Install dependencies"
 	@echo "  lint             Run linter"
 	@echo "  run              Run the import script"
+	@echo "  run-notebook     Run the notebook via papermill"
 	@echo "  docker-build     Build Docker image"
 	@echo "  docker-run       Run import in Docker"
 	@echo "  docker-schedule  Start scheduler in Docker"
@@ -25,6 +26,9 @@ lint:
 
 run:
 	@$(UV) run python main.py
+
+run-notebook:
+	@$(UV) run python scripts/run_notebook.py
 
 docker-build:
 	@docker compose build
