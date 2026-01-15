@@ -144,7 +144,7 @@ Passed unknown parameter: DHIS2_BASE_URL
 Input notebook does not contain a cell with tag 'parameters'
 ```
 
-**Solution:** Added `parameters` tag to the configuration cell in the notebook metadata.
+**Solution:** Added `parameters` tag to the configuration cell in the notebook metadata. This fix was [merged upstream](https://github.com/dhis2/climate-tools/pull/50), so `run_notebook.py` now downloads the notebook directly from GitHub.
 
 ### Issue 5: Same date format bug in notebook
 

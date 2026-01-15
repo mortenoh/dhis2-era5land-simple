@@ -138,10 +138,11 @@ make run-notebook
 
 This uses `scripts/run_notebook.py` which:
 
-1. Loads configuration from `.env` file
-2. Passes parameters to papermill (DHIS2 credentials, data element ID, etc.)
-3. Streams output to stdout for logging (no output file created)
-4. Shares the cache folder with `main.py` for faster subsequent runs
+1. Downloads the latest notebook from [dhis2/climate-tools](https://github.com/dhis2/climate-tools)
+2. Loads configuration from `.env` file
+3. Passes parameters to papermill (DHIS2 credentials, data element ID, etc.)
+4. Streams output to stdout for logging (no output file created)
+5. Shares the cache folder with `main.py` for faster subsequent runs
 
 Papermill is useful for:
 
