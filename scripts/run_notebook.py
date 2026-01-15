@@ -4,6 +4,8 @@
 import os
 import subprocess
 import sys
+import tempfile
+import urllib.request
 from datetime import date
 
 from dotenv import load_dotenv
@@ -23,8 +25,13 @@ if cdsapi_key:
     os.environ["CDSAPI_URL"] = os.getenv("CDSAPI_URL", "https://cds.climate.copernicus.eu/api")
     os.environ["CDSAPI_KEY"] = cdsapi_key
 
-# Build papermill command
-notebook_input = "notebooks/import-era5-daily.ipynb"
+# Download notebook from GitHub
+NOTEBOOK_URL = (
+    "https://raw.githubusercontent.com/dhis2/climate-tools/main/docs/workflows/import-era5/import-era5-daily.ipynb"
+)
+notebook_input = os.path.join(tempfile.gettempdir(), "import-era5-daily.ipynb")
+print(f"Downloading notebook from {NOTEBOOK_URL}...")
+urllib.request.urlretrieve(NOTEBOOK_URL, notebook_input)
 
 # Parameters to pass to the notebook
 # Note: notebook uses IMPORT_START_DATE/IMPORT_END_DATE, .env uses DHIS2_START_DATE/DHIS2_END_DATE
