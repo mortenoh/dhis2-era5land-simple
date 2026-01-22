@@ -54,6 +54,7 @@ DHIS2_DATA_ELEMENT_ID = os.getenv("DHIS2_DATA_ELEMENT_ID")
 # These are coupled - the value_col depends on which variable you download
 DHIS2_VARIABLE = os.getenv("DHIS2_VARIABLE", "total_precipitation")
 DHIS2_VALUE_COL = os.getenv("DHIS2_VALUE_COL", "tp")
+DHIS2_IS_CUMULATIVE = os.getenv("DHIS2_IS_CUMULATIVE", True)  # maybe this should be default False, since it's primarily for precipitation
 
 # Unit conversion
 DHIS2_FROM_UNITS = os.getenv("DHIS2_FROM_UNITS", "m")
@@ -87,6 +88,7 @@ def import_era5_land_to_dhis2(
     variable: str,
     data_element_id: str,
     value_col: str,
+    is_cumulative: str,
     from_units: str,
     to_units: str,
     temporal_aggregation: str,
@@ -147,6 +149,16 @@ def import_era5_land_to_dhis2(
     # Load all files into a single dataset
     logger.info("Loading data from files...")
     ds_hourly = xr.open_mfdataset(files)
+
+    # Cumulative variables such as precipitation
+    # ...have to be de-accumulated before proceeding
+    if is_cumulative:
+        logger.info('Converting cumulative to incremental variable...')
+        # convert cumulative to diffs
+        ds_diffs = ds_hourly.diff(dim='valid_time')
+        # replace negative diffs with original cumulative (the hours where accumulation resets)
+        ds_diffs = xr.where(ds_diffs < 0, ds_hourly.isel(valid_time=slice(1, None)), ds_diffs)
+        ds_hourly = ds_diffs
 
     # Temporal aggregation
     logger.info("Aggregating temporally...")
@@ -251,6 +263,7 @@ def main() -> None:
         variable=DHIS2_VARIABLE,
         data_element_id=DHIS2_DATA_ELEMENT_ID,
         value_col=DHIS2_VALUE_COL,
+        is_cumulative=DHIS2_IS_CUMULATIVE,
         from_units=DHIS2_FROM_UNITS,
         to_units=DHIS2_TO_UNITS,
         temporal_aggregation=DHIS2_TEMPORAL_AGGREGATION,
